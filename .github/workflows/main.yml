@@ -10,13 +10,13 @@ jobs:
         - pypy3
         - 3.6
         - 3.9
-        - 3.10.0-alpha - 3.10.99
+        - 3.10
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: MatteoH2O1999/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
       - name: Install tox
@@ -34,13 +34,12 @@ jobs:
 
   release:
     needs: test
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: MatteoH2O1999/setup-python@v1
         with:
           python-version: 3.9
       - name: Install tox
@@ -48,6 +47,7 @@ jobs:
           python -m pip install tox
       - name: Release
         run: tox -e release
-        env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: "actions/upload-artifact@v4"
+        with:
+          name: artifacts
+          path: ./dist/*
